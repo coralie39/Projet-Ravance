@@ -1,4 +1,6 @@
-Ce simulateur de crédit immobilier a été créé par Elisa MARON et Coralie LUGAND.
+Ce projet de R avancé a pour but de construire un simulateur de crédit immobilier. Il a été créé par Elisa MARON et Coralie LUGAND.
+
+Vous devez télécharger le dossier nommé "fonctions", l'application Shiny "app.R" et le fichier "fonctionnement.md".
 
 Pour le faire fonctionner, l'installation des packages suivants est nécessaire :
 - shiny
