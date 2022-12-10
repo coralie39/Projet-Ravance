@@ -1,4 +1,4 @@
-Ce simumateur de crédit immobilier a été créé par Elisa MARON et Coralie LUGAND.
+Ce simulateur de crédit immobilier a été créé par Elisa MARON et Coralie LUGAND.
 
 Pour le faire fonctionner, l'installation des packages suivants est nécessaire :
 - shiny
