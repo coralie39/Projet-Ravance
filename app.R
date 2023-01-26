@@ -499,7 +499,7 @@ server <- function(input, output) {
   
   ## Calculs et graphiques supplémentaires
   
-  ### Réparition du montant pour le 'reste à vivre'
+  ### Répartition du montant pour le 'reste à vivre'
   
   tableauResteAVivre <- reactive({
     reste_a_vivre <- (revenuEmprunteur1() + revenuEmprunteur2() + 
@@ -532,7 +532,7 @@ server <- function(input, output) {
   
   output$graphique_reste_a_vivre <- renderPlotly(repartitionResteAVivre())
   
-  ### Réparition de la capacité d'emprunt
+  ### Répartition de la capacité d'emprunt
   
   tableauCapaciteEmprunt <- reactive({
     vecteur_emprunt <- rep(0,30)
