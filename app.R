@@ -76,10 +76,10 @@ ui <- dashboardPage(
     sliderInput(
       inputId = "taux_interet",
       label = "Taux d'intérêt annuel :",
-      min = 0.01,
+      min = 0.1,
       max = 6,
-      step = 0.01,
-      value = 2,
+      step = 0.1,
+      value = 1,
       post = "%"
     ),
     
@@ -89,7 +89,7 @@ ui <- dashboardPage(
       label = "Taux d'assurance :",
       min = 0,
       max = 3,
-      step = 0.01,
+      step = 0.1,
       value = 0.5,
       post = "%"
     ),
@@ -313,6 +313,8 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
+  ## Tableau d'amortissement
+  
   amortissement <- reactive({
       tableauAmortissement(
         input$taux_interet,
@@ -320,73 +322,6 @@ server <- function(input, output) {
         input$taux_assurance,
         input$duree
       )
-  })
-  
-  coutTotalCredit <- reactive({
-    (sum(amortissement()$mensualite) + sum(amortissement()$assurance) + input$frais) - input$montant_credit
-  })
-  
-  output$cout_credit <- renderValueBox({
-    valueBox(
-      paste(coutTotalCredit(), "€"),
-      toupper("Côut total du crédit"),
-      icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
-      color = "maroon"
-    )
-  })
-  
-  output$cout_interets <- renderValueBox({
-    valueBox(
-      paste(sum(amortissement()$interets), "€"),
-      toupper("Coût total des intérêts"),
-      icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
-      color = "maroon"
-    )
-  })
-  
-  output$cout_assurances <- renderValueBox({
-    valueBox(
-      paste(sum(amortissement()$assurance), "€"),
-      toupper("Côut total des assurances"),
-      icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
-      color = "maroon"
-    )
-  })
-  
-  output$mensualite <- renderValueBox({
-    valueBox(
-      paste(unique(amortissement()$mensualite), "€"),
-      toupper("Mensualités (hors assurance)"),
-      icon = icon("calendar"),
-      color = "blue"
-    )
-  })
-  
-  output$mensualite_assurance <- renderValueBox({
-    valueBox(
-      paste(unique(amortissement()$mensualite) + unique(amortissement()$assurance),"€"),
-      toupper("Mensualités (avec assurance)"),
-      icon = icon("calendar"),
-      color = "blue"
-    )
-  })
-  
-  calculTAEG <- reactive({
-    mensualite_avec_assurance <- unique(amortissement()$mensualite) + unique(amortissement()$assurance)
-    TAEG(input$montant_credit,
-         input$frais,
-         mensualite_avec_assurance,
-         input$duree)
-  })
-  
-  
-  output$taeg <- renderValueBox({
-    valueBox(
-      paste(calculTAEG(), "%"),
-      toupper("TAEG"),
-      icon = icon("fa-duotone fa-percent", verify_fa = FALSE),
-      color = "orange"
-    )
   })
   
   output$amortissement <- renderDataTable({ 
@@ -410,6 +345,88 @@ server <- function(input, output) {
     }
   )
   
+  ## Cout total du crédit
+  
+  coutTotalCredit <- reactive({
+    (sum(amortissement()$mensualite) + sum(amortissement()$assurance) 
+     + input$frais) - input$montant_credit
+  })
+  
+  output$cout_credit <- renderValueBox({
+    valueBox(
+      paste(round(coutTotalCredit(),2), "€"),
+      toupper("Côut total du crédit"),
+      icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
+      color = "maroon"
+    )
+  })
+  
+  ## Intérêts
+  
+  output$cout_interets <- renderValueBox({
+    valueBox(
+      paste(round(sum(amortissement()$interets),2), "€"),
+      toupper("Coût total des intérêts"),
+      icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
+      color = "maroon"
+    )
+  })
+  
+  ## Assurances
+  
+  output$cout_assurances <- renderValueBox({
+    valueBox(
+      paste(round(sum(amortissement()$assurance),2), "€"),
+      toupper("Côut total des assurances"),
+      icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
+      color = "maroon"
+    )
+  })
+  
+  ## Mensualités hors et avec assurance
+  
+  output$mensualite <- renderValueBox({
+    valueBox(
+      paste(round(unique(amortissement()$mensualite),2), "€"),
+      toupper("Mensualités (hors assurance)"),
+      icon = icon("calendar"),
+      color = "blue"
+    )
+  })
+  
+  output$mensualite_assurance <- renderValueBox({
+    valueBox(
+      paste(round(unique(amortissement()$mensualite) + 
+                    unique(amortissement()$assurance),2),"€"),
+      toupper("Mensualités (avec assurance)"),
+      icon = icon("calendar"),
+      color = "blue"
+    )
+  })
+  
+  ## TAEG
+  
+  calculTAEG <- reactive({
+    mensualite_avec_assurance <- unique(amortissement()$mensualite) + 
+      unique(amortissement()$assurance)
+    TAEG(input$montant_credit,
+         input$frais,
+         mensualite_avec_assurance,
+         input$duree)
+  })
+  
+  
+  output$taeg <- renderValueBox({
+    valueBox(
+      paste(round(calculTAEG(),2), "%"),
+      toupper("TAEG"),
+      icon = icon("fa-duotone fa-percent", verify_fa = FALSE),
+      color = "orange"
+    )
+  })
+  
+  ## Revenus des emprunteurs
+  
   revenuEmprunteur1 <- reactive({
     ## revenu de l'emprunteur 1 sur 12 mois
     input$revenu_emprunteur1 * as.numeric(substr(input$nb_mois_emprunteur1, 1, 2)) / 12
@@ -419,6 +436,8 @@ server <- function(input, output) {
     ## revenu de l'emprunteur 2 sur 12 mois
     input$revenu_emprunteur2 * as.numeric(substr(input$nb_mois_emprunteur2, 1, 2)) / 12
   })
+  
+  ## Taux d'endettement
   
   tauxEndettement <- reactive({
     input$charges / (revenuEmprunteur1() + revenuEmprunteur2() + input$autres_revenus) * 100
@@ -433,14 +452,17 @@ server <- function(input, output) {
     )
   })
   
+  ## Capacité d'emprunt
+  
   capaciteEmpruntMensualite <- reactive({
     # (revenuEmprunteur1() + revenuEmprunteur2() + input$autres_revenus) * input$taux_endettement / 100 - input$charges
-    (revenuEmprunteur1() + revenuEmprunteur2() + input$autres_revenus - input$charges) * input$taux_endettement / 100
+    (revenuEmprunteur1() + revenuEmprunteur2() + input$autres_revenus 
+     - input$charges) * input$taux_endettement / 100
   })
   
   output$capacite_emprunt_mensualite <- renderValueBox({
     valueBox(
-      paste(capaciteEmpruntMensualite(), "€ / mois"),
+      paste(round(capaciteEmpruntMensualite(),2), "€ / mois"),
       toupper("Capacité d'emprunt par mois"),
       icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
       color = "maroon"
@@ -459,7 +481,7 @@ server <- function(input, output) {
   
   output$capacite_emprunt <- renderValueBox({
     valueBox(
-      paste(capaciteEmprunt(), "€"),
+      paste(round(capaciteEmprunt(),2), "€"),
       toupper("Capacité d'emprunt"),
       icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
       color = "maroon"
@@ -468,15 +490,18 @@ server <- function(input, output) {
   
   output$capacite_emprunt_total <- renderValueBox({
     valueBox(
-      paste(capaciteEmprunt() + input$apport_personnel - input$frais, "€"),
+      paste(round(capaciteEmprunt() + input$apport_personnel - input$frais,2), "€"),
       toupper("Capacité d'achat / d'acquisition"),
       icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
       color = "maroon"
     )
   })
   
+  ## Calculs et graphiques supplémentaires
+  
   tableauResteAVivre <- reactive({
-    reste_a_vivre <- (revenuEmprunteur1() + revenuEmprunteur2() + input$autres_revenus) - input$charges - capaciteEmpruntMensualite()
+    reste_a_vivre <- (revenuEmprunteur1() + revenuEmprunteur2() + 
+                        input$autres_revenus) - input$charges - capaciteEmpruntMensualite()
     df <- data.frame(categorie <- c("Charges", "Emprunt", "Reste à vivre"),
                      total <- c(input$charges, 
                                 capaciteEmpruntMensualite(), 
