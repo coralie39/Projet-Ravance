@@ -505,9 +505,9 @@ server <- function(input, output) {
     reste_a_vivre <- (revenuEmprunteur1() + revenuEmprunteur2() + 
                         input$autres_revenus) - input$charges - capaciteEmpruntMensualite()
     df <- data.frame(categorie <- c("Charges", "Emprunt", "Reste à vivre"),
-                     total <- c(input$charges, 
-                                capaciteEmpruntMensualite(), 
-                                reste_a_vivre))
+                     total <- c(round(input$charges,2), 
+                                round(capaciteEmpruntMensualite(),2), 
+                                round(reste_a_vivre,2)))
     colnames(df) <- c("categorie", "total")
     df
   })
