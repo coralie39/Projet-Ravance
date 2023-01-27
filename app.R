@@ -556,7 +556,7 @@ server <- function(input, output) {
       aes(x = nb_annee, y = capacite_emprunt) +
       geom_line(stat = "identity", color = "deeppink3") + geom_point(color = "deeppink3") + 
       ggtitle(paste("Montant du prêt immobilier pour une mensualité de \n",
-                    capaciteEmpruntMensualite(),
+                    round(capaciteEmpruntMensualite(),2),
                     "€ / mois selon les durées de remboursement")) +
       xlab("Durée du crédit") + scale_x_continuous(breaks=vecteur_annee) +
       ylab("Capacité d'emprunt (en €)") +
