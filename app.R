@@ -462,7 +462,7 @@ server <- function(input, output) {
   
   output$capacite_emprunt_mensualite <- renderValueBox({
     valueBox(
-      paste(round(capaciteEmpruntMensualite(),2), "€ / mois"),
+      paste(round(capaciteEmpruntMensualite(),2), "€"),
       toupper("Capacité d'emprunt par mois"),
       icon = icon("fa-solid fa-euro-sign", verify_fa = FALSE),
       color = "maroon"
